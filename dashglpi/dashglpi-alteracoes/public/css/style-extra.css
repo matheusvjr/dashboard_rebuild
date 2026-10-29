@@ -1,0 +1,179 @@
+/* DashGLPI - complemento visual (carregar DEPOIS de style.css)
+   Usa as variáveis do tema do projeto (--glass-*, --primary, --success, --text-*),
+   definidas no body para acompanhar o modo claro. */
+
+body {
+    --dg-line: var(--glass-border);
+    --dg-soft: var(--glass-bg-hover);
+    --dg-ok: var(--success);
+    --dg-info: var(--primary);
+    --dg-warn: var(--warning);
+    --dg-bad: var(--danger);
+    /* usadas no ranking, mas ainda sem definição no style.css */
+    --card-bg: var(--glass-bg);
+    --border-color: var(--glass-border);
+}
+
+/* ---------- Acessibilidade e base ---------- */
+.skip-link {
+    position: fixed; top: -48px; left: 16px; z-index: 10000;
+    padding: 10px 16px; border-radius: 8px;
+    background: var(--dg-info); color: #fff; font-weight: 600; text-decoration: none;
+    transition: top .2s;
+}
+.skip-link:focus { top: 12px; }
+
+:focus-visible { outline: 2px solid var(--dg-info); outline-offset: 2px; }
+::selection { background: color-mix(in srgb, var(--dg-info) 35%, transparent); }
+
+.kpi-value, .detail-value, .sla-num, .health-score strong { font-variant-numeric: tabular-nums; }
+
+* { scrollbar-width: thin; scrollbar-color: var(--dg-line) transparent; }
+
+tr[hidden], #assets-grid > [hidden] { display: none !important; }
+
+/* ---------- Cabeçalho: ao vivo, atualização ---------- */
+.live-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-left: 12px; padding: 2px 10px; border-radius: 999px;
+    font-size: .72rem; font-weight: 600;
+    color: var(--dg-ok); background: color-mix(in srgb, var(--dg-ok) 14%, transparent);
+}
+.live-pill i { font-size: .45rem; animation: dg-pulse 2s ease-in-out infinite; }
+.live-pill.off { color: var(--dg-bad); background: color-mix(in srgb, var(--dg-bad) 14%, transparent); }
+.live-pill.off i { animation: none; }
+.sync-info { margin-left: 12px; font-size: .8rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+.refresh-control { display: inline-flex; align-items: center; }
+.refresh-control.spinning #refreshBtn i { animation: dg-spin .8s linear infinite; }
+
+.icon-btn.text-btn { width: auto; padding: 0 16px; gap: 8px; font-size: .85rem; font-weight: 600; }
+
+/* ---------- Seletor de período ---------- */
+.period-switch { display: inline-flex; padding: 4px; gap: 2px; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--glass-bg); }
+.period-btn { height: 40px; padding: 0 14px; border: 0; border-radius: 12px; background: transparent; color: var(--text-sec); font-size: .82rem; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+.period-btn:hover { color: var(--text-main); background: var(--dg-soft); }
+.period-btn.active { background: var(--dg-info); color: #fff; }
+.period-note { margin: 0 0 16px; font-size: .85rem; color: var(--text-sec); }
+
+/* ---------- Painel de insights ---------- */
+.grid-insights {
+    display: grid; gap: 24px; margin-bottom: 24px;
+    grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) minmax(260px, 1fr);
+}
+.insight-card { padding: 24px; }
+.chart-sm { height: 220px; position: relative; }
+
+.health-body { display: flex; align-items: center; gap: 24px; margin-top: 16px; }
+.health-ring { position: relative; width: 128px; height: 128px; flex: none; color: var(--dg-ok); }
+.health-ring.state-warn { color: var(--dg-warn); }
+.health-ring.state-bad { color: var(--dg-bad); }
+.health-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.health-ring circle { fill: none; stroke-width: 10; }
+.ring-bg { stroke: var(--dg-line); }
+.ring-fg { stroke: currentColor; stroke-linecap: round; stroke-dasharray: 326.73; stroke-dashoffset: 326.73; transition: stroke-dashoffset .9s cubic-bezier(.2, .8, .2, 1); }
+.health-score { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.health-score strong { font-size: 2rem; font-weight: 800; line-height: 1; color: var(--text-main); }
+.health-score small { font-size: .7rem; color: var(--text-muted); margin-top: 4px; }
+.health-label { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: var(--text-main); }
+.health-hint { font-size: .85rem; line-height: 1.5; color: var(--text-sec); max-width: 34ch; }
+
+.meter-list { display: flex; flex-direction: column; gap: 18px; margin-top: 16px; }
+.meter-top { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: 6px; color: var(--text-sec); }
+.meter-top b { color: var(--text-main); font-variant-numeric: tabular-nums; }
+.meter-track { height: 8px; border-radius: 999px; background: var(--dg-line); overflow: hidden; }
+.meter-fill { height: 100%; width: 0; border-radius: inherit; transition: width .8s cubic-bezier(.2, .8, .2, 1); }
+.meter-fill.success { background: var(--dg-ok); }
+.meter-fill.primary { background: var(--dg-info); }
+.meter-fill.warning { background: var(--dg-warn); }
+.meter-fill.danger { background: var(--dg-bad); }
+
+/* Destaque breve quando um número muda após atualizar */
+.kpi-updated { animation: dg-flash 1.2s ease-out; }
+
+/* ---------- Gráficos e SLA (substitui estilos inline) ---------- */
+.chart-wide { grid-column: span 2; }
+
+.sla-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 24px; }
+.sla-stat { padding: 32px; text-align: center; }
+.sla-stat > i { font-size: 2.6rem; margin-bottom: 12px; display: block; }
+.sla-num { font-size: 2.6rem; font-weight: 800; margin-bottom: 8px; line-height: 1.1; }
+.sla-lbl { font-size: .85rem; letter-spacing: .5px; color: var(--text-muted); }
+.sla-critical > i, .sla-critical .sla-num { color: var(--dg-bad); }
+.sla-warning > i, .sla-warning .sla-num { color: var(--dg-warn); }
+.sla-ok > i, .sla-ok .sla-num { color: var(--dg-ok); }
+.sla-list-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 24px; padding: 0 24px; }
+.sla-list-card { padding-top: 24px; }
+.sla-list-card .sla-widget { padding: 0 24px 24px; }
+
+/* ---------- Tabelas, filtros e chips ---------- */
+.table-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 20px 24px 8px; }
+.search-box.wide { flex: 1 1 280px; max-width: 420px; }
+.search-box.wide input { width: 100%; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+    padding: 6px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--dg-line); background: transparent;
+    color: var(--text-sec); font-size: .8rem; font-weight: 500;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.chip:hover { background: var(--dg-soft); }
+.chip.active { background: var(--dg-info); border-color: var(--dg-info); color: #fff; }
+.toolbar-count { margin-left: auto; font-size: .8rem; color: var(--text-muted); }
+.custom-table tbody tr { transition: background .12s; }
+.custom-table tbody tr:hover { background: var(--dg-soft); }
+#assets-grid { margin-top: 8px; }
+#assetsSection .table-toolbar { padding-left: 0; padding-right: 0; }
+
+/* ---------- Modal de ativo: botão copiar ---------- */
+.copy-btn {
+    margin-top: 6px; padding: 4px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid currentColor; background: transparent; color: inherit;
+    font-size: .72rem; opacity: .8;
+}
+.copy-btn:hover { opacity: 1; }
+
+/* ---------- Toasts ---------- */
+.dg-toast-wrap { position: fixed; right: 20px; bottom: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.dg-toast {
+    padding: 12px 18px; border-radius: 12px; font-size: .88rem; font-weight: 500;
+    color: #fff; background: #1e293b; border-left: 4px solid var(--dg-info);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .28); animation: dg-in .22s ease-out;
+}
+.dg-toast.ok { border-left-color: var(--dg-ok); }
+.dg-toast.warn { border-left-color: var(--dg-warn); }
+.dg-toast.out { opacity: 0; transform: translateY(6px); transition: .22s; }
+
+/* ---------- Diálogo de atalhos ---------- */
+.dg-overlay { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(2, 6, 23, .6); backdrop-filter: blur(4px); }
+.dg-overlay[hidden] { display: none; }
+.dg-dialog { width: min(440px, 100%); padding: 24px; border-radius: 16px; background: var(--bg-body); color: var(--text-main); border: 1px solid var(--dg-line); }
+.dg-dialog-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.dg-dialog-head h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.shortcut-list { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.shortcut-list > div { display: flex; justify-content: space-between; gap: 16px; font-size: .88rem; }
+.shortcut-list dt { font-weight: 400; }
+.shortcut-list dd { margin: 0; color: var(--text-sec); text-align: right; }
+kbd { padding: 2px 8px; border-radius: 6px; border: 1px solid var(--dg-line); background: var(--dg-soft); color: var(--text-main); font: 600 .78rem/1.4 inherit; }
+
+/* ---------- Animações ---------- */
+@keyframes dg-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes dg-spin { to { transform: rotate(360deg); } }
+@keyframes dg-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes dg-flash { 0% { box-shadow: 0 0 0 2px var(--dg-info); } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 1200px) { .grid-insights { grid-template-columns: 1fr 1fr; } .grid-insights > :first-child { grid-column: span 2; } }
+@media (max-width: 992px) { .chart-wide { grid-column: auto; } }
+@media (max-width: 768px) {
+    .grid-insights, .sla-stats { grid-template-columns: 1fr; }
+    .grid-insights > :first-child { grid-column: auto; }
+    .health-body { flex-direction: column; text-align: center; }
+    .header-actions { flex-wrap: wrap; }
+    .toolbar-count { margin-left: 0; }
+    .live-pill, .sync-info { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
